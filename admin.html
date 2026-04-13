@@ -72,6 +72,32 @@
 
                     <div class="tab-pane fade" id="quan-ly-don-hang" role="tabpanel">
                         <h2 class="text-primary fw-bold mb-3">Danh Sách Khách Đặt Hàng</h2>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm bg-primary text-white rounded-4">
+                                    <div class="card-body p-4">
+                                        <h6 class="text-uppercase fw-bold opacity-75">📦 Tổng đơn hàng</h6>
+                                        <h2 class="display-6 fw-bold mb-0" id="stat-tong-don">0</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm bg-success text-white rounded-4">
+                                    <div class="card-body p-4">
+                                        <h6 class="text-uppercase fw-bold opacity-75">🌼 Hoa đã bán</h6>
+                                        <h2 class="display-6 fw-bold mb-0" id="stat-tong-hoa">0</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border-0 shadow-sm bg-warning text-dark rounded-4">
+                                    <div class="card-body p-4">
+                                        <h6 class="text-uppercase fw-bold opacity-75">💰 Tổng doanh thu</h6>
+                                        <h2 class="display-6 fw-bold mb-0" id="stat-tong-tien">0 đ</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="card shadow-sm border-0">
                             <div class="card-body p-0 table-responsive">
                                 <table class="table table-hover align-middle mb-0">
@@ -254,21 +280,33 @@
             }
         }
 
-        // 3. HÀM TẢI DANH SÁCH ĐƠN HÀNG (ĐÃ SỬA LỖI LỆCH CỘT)
+        // 3. HÀM TẢI DANH SÁCH ĐƠN HÀNG (ĐÃ SỬA LỖI LỆCH CỘT) & TÍNH TOÁN THỐNG KÊ
         async function taiDanhSachDonHang() {
             try {
                 const querySnapshot = await getDocs(collection(db, "don_hang"));
                 let html = "";
+                
+                // Khởi tạo các biến đếm
+                let tongDon = 0;
+                let tongHoa = 0;
+                let tongDoanhThu = 0;
+
                 querySnapshot.forEach((docItem) => {
                     const don = docItem.data();
                     const trangThai = don.trang_thai || "Đang xử lý ⏳";
                     
-                    // Tạo nút Chỉ đường nếu có link GPS
+                    // --- LOGIC THỐNG KÊ ---
+                    tongDon++; // Cứ mỗi document là 1 đơn
+                    // Chỉ cộng tiền khi đơn hàng đã chốt
+                    if (!trangThai.includes("Đang xử lý")) { // Chỉ tính những đơn đã chốt
+                    tongHoa += Number(don.so_luong); // Cộng dồn số lượng hoa
+                    tongDoanhThu += Number(don.tong_tien); // Cộng dồn tiền
+                    }
+                    // (Phần tạo nút Thao tác và HTML bảng giữ nguyên như cũ của em)
                     const linkGps = don.link_vi_tri 
                         ? `<a href="${don.link_vi_tri}" target="_blank" class="btn btn-sm btn-outline-danger fw-bold mt-1">🗺️ Chỉ đường</a>` 
                         : `<small class="text-muted d-block mt-1">Không có GPS</small>`;
 
-                    // Logic hiển thị nút Xác nhận
                     let nutThaoTac = "";
                     if (trangThai.includes("Đang xử lý")) {
                         nutThaoTac = `<button class="btn btn-sm btn-primary fw-bold shadow-sm" onclick="window.xacNhanDon('${docItem.id}')">Xác nhận ✅</button>`;
@@ -276,7 +314,6 @@
                         nutThaoTac = `<span class="badge bg-success px-3 py-2">Đã Chốt</span>`;
                     }
 
-                    // Đã tách riêng <td> của Tên Hoa và <td> của Số Lượng để khớp với 9 cột
                     html += `
                         <tr>
                             <td>${don.ngay_dat}</td>
@@ -285,7 +322,9 @@
                                 <small class="text-muted">${don.email_khach}</small>
                             </td>
                             <td class="text-danger fw-bold">${don.so_dien_thoai}</td>
-                            <td class="fw-bold text-dark">${don.ten_hoa}</td> <td class="text-center fw-bold">${don.so_luong}</td> <td class="text-success fw-bold">${don.tong_tien.toLocaleString()} đ</td>
+                            <td class="fw-bold text-dark">${don.ten_hoa}</td> 
+                            <td class="text-center fw-bold">${don.so_luong}</td> 
+                            <td class="text-success fw-bold">${don.tong_tien.toLocaleString()} đ</td>
                             <td>
                                 ${don.dia_chi}<br>
                                 ${linkGps}
@@ -295,6 +334,12 @@
                         </tr>
                     `;
                 });
+
+                // HIỂN THỊ CON SỐ LÊN CÁC Ô THỐNG KÊ
+                document.getElementById("stat-tong-don").innerText = tongDon;
+                document.getElementById("stat-tong-hoa").innerText = tongHoa;
+                document.getElementById("stat-tong-tien").innerText = tongDoanhThu.toLocaleString() + " đ";
+
                 document.getElementById("bang-don-hang").innerHTML = html;
             } catch (error) {
                 console.log("Lỗi tải đơn hàng:", error);

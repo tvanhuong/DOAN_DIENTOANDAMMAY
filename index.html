@@ -60,14 +60,50 @@
                 </li>
             </ul>
         </div>
-    </div>
-
-    <header class="bg-success text-white text-center py-5 mb-4 shadow">
-        <div class="container">
-            <h1 class="display-5 fw-bold">Tiệm Bông Thọ Nhà Trồng</h1>
-            <p class="lead mb-0">Mang xuân rực rỡ đến mọi nhà</p>
+    </div> 
+    <!--Phần nội dung chính của trang chủ sẽ được hiển thị ở đây -->
+    <div id="carouselTiemHoa" class="carousel slide mb-5 shadow-sm" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselTiemHoa" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#carouselTiemHoa" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#carouselTiemHoa" data-bs-slide-to="2"></button>
         </div>
-    </header>
+
+        <div class="carousel-inner">
+            <div class="carousel-item active" data-bs-interval="3500">
+                <img src="https://i.ibb.co/G4WDVxpf/y-nghia-cua-hoa-van-tho-ngay-tet-202011171553046961.jpg" class="d-block w-100" style="height: 450px; object-fit: cover; filter: brightness(0.7);" alt="Vườn hoa vạn thọ">
+                <div class="carousel-caption d-none d-md-block" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                    <h1 class="display-4 fw-bold text-warning">Tiệm Bông Thọ Nhà Trồng</h1>
+                    <p class="lead fs-4 text-white">Mang sắc xuân rực rỡ đến mọi nhà</p>
+                </div>
+            </div>
+            
+            <div class="carousel-item" data-bs-interval="3500">
+                <img src="https://i.ibb.co/0R70sbss/A.jpg" class="d-block w-100" style="height: 450px; object-fit: cover; filter: brightness(0.7);" alt="Hoa Tết">
+                <div class="carousel-caption d-none d-md-block" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                    <h2 class="display-5 fw-bold text-warning">Đơm Bông Cực To, Nở Đều</h2>
+                    <p class="lead fs-4 text-white">Cam kết chất lượng 100% hoa khỏe từ vườn</p>
+                </div>
+            </div>
+            
+            <div class="carousel-item" data-bs-interval="3500">
+                <img src="https://i.ibb.co/9HL0xsg0/hat-giong-hoa-van-tho-phap-cao-3-500x500.jpg" class="d-block w-100" style="height: 450px; object-fit: cover; filter: brightness(0.7);" alt="Giao hàng">
+                <div class="carousel-caption d-none d-md-block" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">
+                    <h2 class="display-5 fw-bold text-warning">Chốt Đơn Giao Tận Nơi</h2>
+                    <p class="lead fs-4 text-white">Nhận ship hoa mọi nẻo đường ngày cận Tết</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselTiemHoa" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Trước</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselTiemHoa" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Sau</span>
+        </button>
+    </div>
 
     <div class="container mb-5" id="khu-vuc-san-pham">
 
@@ -267,7 +303,7 @@
                 </div>
             </div>
         </div>
-        // Javascript chính của trang chủ, xử lý đăng nhập, tải dữ liệu hoa, đặt hàng, v.v...
+        <!-- Javascript chính của trang chủ, xử lý đăng nhập, tải dữ liệu hoa, đặt hàng, thêm băng Chuyền Hình Ảnh-->
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
         <script type="module">
@@ -416,11 +452,11 @@
                     alert("Trình duyệt này không hỗ trợ lấy vị trí GPS.");
                 }
             };
-            // 3. TẢI DỮ LIỆU HOA TỪ FIRESTORE
+           
             // Biến toàn cục để chứa toàn bộ hoa tải từ mây về
             window.khoHoaToanCuc = [];
 
-            // 3. TẢI DỮ LIỆU TỪ FIRESTORE VÀ CẤT VÀO KHO
+         
             // 3. TẢI DỮ LIỆU TỪ FIRESTORE VÀ CẤT VÀO KHO
             async function taiDanhSachHoa() {
                 try {
@@ -440,7 +476,7 @@
                     // Đổ hoa ra màn hình
                     hienThiHoa(window.khoHoaToanCuc);
 
-                    // --- DÒNG QUAN TRỌNG NHẤT ĐÂY ---
+                   
                     // Tải xong rồi thì giấu chữ "Đang tải..." đi
                     document.getElementById("loading-hoa").style.display = "none";
 
