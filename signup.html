@@ -57,60 +57,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-        // Bổ sung import công cụ của Firestore
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC8z0VzOWLwlpOSPQlNQyHhz8vZ1y7gG0Y",
-            authDomain: "hoavantho-tet.firebaseapp.com",
-            projectId: "hoavantho-tet",
-            storageBucket: "hoavantho-tet.firebasestorage.app",
-            messagingSenderId: "446841110492",
-            appId: "1:446841110492:web:0b41a649e1bad3f29c9919",
-            measurementId: "G-YQ2PLW1F28"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app); // Khởi tạo Database
-
-        // Đăng ký với email/password
-        document.getElementById('signupForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-
-            if (password !== confirmPassword) {
-                alert('Mật khẩu xác nhận không khớp!');
-                return;
-            }
-
-            try {
-                // 1. Tạo tài khoản trên hệ thống Auth
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-                // 2. Cập nhật tên hiển thị
-                await updateProfile(userCredential.user, { displayName: name });
-
-                // 3. QUAN TRỌNG: Lưu thông tin vào bảng 'tai_khoan' với quyền mặc định là 'user'
-                await setDoc(doc(db, "tai_khoan", userCredential.user.uid), {
-                    ho_ten: name,
-                    email: email,
-                    quyen_han: "user" // Mặc định ai đăng ký cũng là user
-                });
-
-                alert('Đăng ký thành công!');
-                window.location.href = 'index.html';
-            } catch (error) {
-                alert('Lỗi đăng ký: ' + error.message);
-            }
-        });
-    </script>
+    <script type = "module" src = "js/auth.js"></script>
 
 </body>
 
