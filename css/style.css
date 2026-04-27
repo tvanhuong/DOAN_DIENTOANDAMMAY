@@ -4,3 +4,15 @@ body { background-color: #f4f6f9; }
 .nav-link { color: #c2c7d0; font-weight: bold; }
 .nav-link:hover, .nav-link.active { color: white; background-color: #198754; border-radius: 5px; }
 #loading-screen { height: 100vh; display: flex; align-items: center; justify-content: center; background: white; position: fixed; width: 100%; z-index: 9999; }
+/* Tùy chỉnh chữ trên slider cho màn hình điện thoại (kích thước dưới 768px) */
+@media (max-width: 768px) {
+    .carousel-caption {
+        bottom: 20px; /* Nhích cụm chữ lên một chút để không đè vào thanh tìm kiếm bên dưới */
+    }
+    .carousel-caption h1 {
+        font-size: 1.5rem !important; /* Thu nhỏ tiêu đề vàng */
+    }
+    .carousel-caption p {
+        font-size: 0.9rem !important; /* Thu nhỏ dòng chữ phụ */
+    }
+}

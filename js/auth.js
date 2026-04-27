@@ -9,9 +9,7 @@ import { auth, db } from "./firebase.js";
 
 const provider = new GoogleAuthProvider();
 
-// ==========================================
-// A. XỬ LÝ TRANG ĐĂNG NHẬP (login.html)
-// ==========================================
+// Xử lý trang đăng nhập (login.html)
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
@@ -47,9 +45,7 @@ if (loginForm) {
     };
 }
 
-// ==========================================
-// B. XỬ LÝ TRANG ĐĂNG KÝ (signup.html)
-// ==========================================
+// Xử lý trang đăng ký (signup.html)
 const signupForm = document.getElementById('signupForm');
 if (signupForm) {
     signupForm.addEventListener('submit', async (e) => {

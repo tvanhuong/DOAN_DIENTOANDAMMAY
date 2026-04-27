@@ -1,12 +1,12 @@
 // File: js/admin.js
-// 1. Nhập các công cụ từ Firestore và Auth (KHÔNG có initializeApp nữa)
-import { collection, getDocs, addDoc, doc, getDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+// Nhập các công cụ từ Firestore và Auth (KHÔNG có initializeApp)
+import { collection, getDocs, addDoc, doc, getDoc, deleteDoc, updateDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 
-// 2. Kéo db và auth từ file firebase.js sang (Nhớ có dấu ./)
+//Kéo db và auth từ file firebase.js
 import { db, auth } from "./firebase.js";
 
-// 3. KIỂM TRA BẢO MẬT ADMIN
+// kiểm tra trạng thái đăng nhập và quyền admin
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         const docSnap = await getDoc(doc(db, "tai_khoan", user.uid));
@@ -26,7 +26,7 @@ onAuthStateChanged(auth, async (user) => {
 
 window.danhSachHoaKho = {};
 
-// 4. HÀM TẢI DANH SÁCH HOA
+// Hàm tải danh sách hoa từ Firestore và hiển thị lên bảng quản lý
 async function taiDanhSachHoa() {
     try {
         const querySnapshot = await getDocs(collection(db, "san_pham"));
@@ -44,8 +44,8 @@ async function taiDanhSachHoa() {
                     <td>${hoa.so_luong_con}</td>
                     <td>${hoa.mo_ta}</td>
                     <td class="text-center">
-                        <button class="btn btn-sm btn-warning fw-bold me-1 shadow-sm" onclick="window.moModalSuaHoa('${docItem.id}')">Sửa ✏️</button>
-                        <button class="btn btn-sm btn-danger fw-bold shadow-sm" onclick="window.xoaHoa('${docItem.id}', '${hoa.ten_hoa}')">Xóa 🗑️</button>
+                        <button class="btn btn-sm btn-warning fw-bold me-1 shadow-sm" onclick="window.moModalSuaHoa('${docItem.id}')">Sửa</button>
+                        <button class="btn btn-sm btn-danger fw-bold shadow-sm" onclick="window.xoaHoa('${docItem.id}', '${hoa.ten_hoa}')">Xóa</button>
                     </td>
                 </tr>
             `;
@@ -56,10 +56,12 @@ async function taiDanhSachHoa() {
     }
 }
 
-// 5. HÀM TẢI DANH SÁCH ĐƠN HÀNG
+// Hàm tải danh sách đơn hàng
 async function taiDanhSachDonHang() {
     try {
-        const querySnapshot = await getDocs(collection(db, "don_hang"));
+        // Sắp xếp theo số timestamp giảm dần để đơn mới nhất hiện lên đầu
+        const q = query(collection(db, "don_hang"), orderBy("ngay_dat_timestamp", "desc"));
+        const querySnapshot = await getDocs(q);
         let html = "";
         let tongDon = 0;
         let tongHoa = 0;
@@ -67,7 +69,7 @@ async function taiDanhSachDonHang() {
 
         querySnapshot.forEach((docItem) => {
             const don = docItem.data();
-            const trangThai = don.trang_thai || "Đang xử lý ⏳";
+            const trangThai = don.trang_thai || "Đang xử lý";
 
             tongDon++;
             if (!trangThai.includes("Đang xử lý")) {
@@ -76,12 +78,12 @@ async function taiDanhSachDonHang() {
             }
 
             const linkGps = don.link_vi_tri
-                ? `<a href="${don.link_vi_tri}" target="_blank" class="btn btn-sm btn-outline-danger fw-bold mt-1">🗺️ Chỉ đường</a>`
+                ? `<a href="${don.link_vi_tri}" target="_blank" class="btn btn-sm btn-outline-danger fw-bold mt-1">Chỉ đường</a>`
                 : `<small class="text-muted d-block mt-1">Không có GPS</small>`;
 
             let nutThaoTac = "";
             if (trangThai.includes("Đang xử lý")) {
-                nutThaoTac = `<button class="btn btn-sm btn-primary fw-bold shadow-sm" onclick="window.xacNhanDon('${docItem.id}')">Xác nhận ✅</button>`;
+                nutThaoTac = `<button class="btn btn-sm btn-primary fw-bold shadow-sm" onclick="window.xacNhanDon('${docItem.id}')">Xác nhận</button>`;
             } else {
                 nutThaoTac = `<span class="badge bg-success px-3 py-2">Đã Chốt</span>`;
             }
@@ -134,7 +136,7 @@ document.getElementById("btnLuuHoa").addEventListener("click", async () => {
         const statusText = document.getElementById("uploadStatus");
         btn.disabled = true;
         statusText.style.display = "block";
-        statusText.innerHTML = `<div class="spinner-border spinner-border-sm"></div> Đang đẩy ảnh sang ImgBB 🚀...`;
+        statusText.innerHTML = `<div class="spinner-border spinner-border-sm"></div> Đang đẩy ảnh sang ImgBB...`;
 
         const formData = new FormData();
         formData.append("image", fileAnh);
@@ -146,7 +148,7 @@ document.getElementById("btnLuuHoa").addEventListener("click", async () => {
         if (!data.success) throw new Error("ImgBB từ chối nhận ảnh!");
 
         const linkAnhLuuTrenMay = data.data.display_url;
-        statusText.innerHTML = `<div class="spinner-border spinner-border-sm"></div> Đang lưu dữ liệu vào Firebase 📝...`;
+        statusText.innerHTML = `<div class="spinner-border spinner-border-sm"></div> Đang lưu dữ liệu vào Firebase...`;
 
         await addDoc(collection(db, "san_pham"), {
             ten_hoa: ten, gia_ban: gia, so_luong_con: sl, mo_ta: mota, hinh_anh: linkAnhLuuTrenMay
@@ -160,7 +162,7 @@ document.getElementById("btnLuuHoa").addEventListener("click", async () => {
         document.getElementById("moTa").value = "";
         fileInput.value = "";
         statusText.style.display = "none";
-        btn.innerText = "Đẩy Lên Mây ☁️";
+        btn.innerText = "Đẩy Lên Mây";
         btn.disabled = false;
         bootstrap.Modal.getInstance(document.getElementById('modalThemHoa')).hide();
         taiDanhSachHoa();
@@ -168,7 +170,7 @@ document.getElementById("btnLuuHoa").addEventListener("click", async () => {
     } catch (error) {
         alert("Lỗi tải ảnh: " + error.message);
         document.getElementById("btnLuuHoa").disabled = false;
-        document.getElementById("btnLuuHoa").innerText = "Đẩy Lên Mây ☁️";
+        document.getElementById("btnLuuHoa").innerText = "Đẩy Lên Mây";
         document.getElementById("uploadStatus").style.display = "none";
     }
 });
@@ -189,7 +191,7 @@ window.xacNhanDon = async (idDocument) => {
     if (confirm("Xác nhận chốt đơn hàng này và chuẩn bị đi giao?")) {
         try {
             await updateDoc(doc(db, "don_hang", idDocument), {
-                trang_thai: "Đã xác nhận ✅, đang giao 🚚"
+                trang_thai: "Đã xác nhận, đang giao"
             });
             alert("Chốt đơn thành công! Trạng thái đã được cập nhật cho khách hàng.");
             taiDanhSachDonHang();
@@ -233,7 +235,7 @@ document.getElementById("btnLuuSuaHoa").addEventListener("click", async () => {
 
         if (fileAnh) {
             statusText.style.display = "block";
-            statusText.innerHTML = `<div class="spinner-border spinner-border-sm"></div> Đang đẩy ảnh mới sang ImgBB 🚀...`;
+            statusText.innerHTML = `<div class="spinner-border spinner-border-sm"></div> Đang đẩy ảnh mới sang ImgBB...`;
 
             const formData = new FormData();
             formData.append("image", fileAnh);
@@ -248,7 +250,7 @@ document.getElementById("btnLuuSuaHoa").addEventListener("click", async () => {
             }
         }
 
-        statusText.innerHTML = `<div class="spinner-border spinner-border-sm"></div> Đang lưu dữ liệu cập nhật 📝...`;
+        statusText.innerHTML = `<div class="spinner-border spinner-border-sm"></div> Đang lưu dữ liệu cập nhật...`;
         await updateDoc(doc(db, "san_pham", idHoa), duLieuMoi);
         alert("Đã cập nhật hoa thành công!");
 
@@ -263,7 +265,7 @@ document.getElementById("btnLuuSuaHoa").addEventListener("click", async () => {
         document.getElementById("uploadStatusEdit").style.display = "none";
     }
 });
-// --- LOGIC QUẢN LÝ VỊ TRÍ GIAO HÀNG (TỰ ĐỘNG GOM ĐƠN) ---
+//Logic quản lí vị trí giao hàng, gôm các đơn lại chung 1 chuyến
 let map; 
 let layerMarkers = L.layerGroup(); 
 
@@ -284,7 +286,7 @@ document.getElementById("tab-ban-do").addEventListener("shown.bs.tab", async fun
         const querySnapshot = await getDocs(collection(db, "don_hang"));
         let danhSachDonGps = [];
         
-        // 1. Thu thập tất cả các đơn hàng có GPS và chưa giao
+        // Thu thập tất cả các đơn hàng có định vị GPS và chưa giao
         querySnapshot.forEach((docItem) => {
             const don = docItem.data();
             if (don.link_vi_tri && !don.trang_thai.includes("Đã giao")) {
@@ -298,7 +300,7 @@ document.getElementById("tab-ban-do").addEventListener("shown.bs.tab", async fun
                             ten: don.ten_nguoi_nhan || "Khách hàng",
                             sdt: don.so_dien_thoai,
                             hoa: don.ten_hoa,
-                            sl: Number(don.so_luong), // Ép kiểu số
+                            sl: Number(don.so_luong), // Ép kiểu so_luong về số để tính tổng chậu
                             dia_chi: don.dia_chi,
                             lat: lat,
                             lng: lng
@@ -308,7 +310,7 @@ document.getElementById("tab-ban-do").addEventListener("shown.bs.tab", async fun
             }
         });
 
-        // 2. THUẬT TOÁN TỰ ĐỘNG GOM CHUYẾN XE (Tối đa 10 chậu/chuyến)
+        // Thuật toán tự động gôm các đơn hàng gần nhau thành chuyến xe (Mỗi chuyến tối đa 10 chậu)
         let cacChuyenXe = [];
         let donChuaPhanBo = [...danhSachDonGps]; // Copy danh sách
 
@@ -343,7 +345,7 @@ document.getElementById("tab-ban-do").addEventListener("shown.bs.tab", async fun
             cacChuyenXe.push(chuyenXeMoi);
         }
 
-        // 3. HIỂN THỊ DANH SÁCH VÀ CHẤM ĐIỂM LÊN BẢN ĐỒ
+        // 3. Hiện thị danh sách và chấm điểm lên bản đồ
         let htmlDanhSach = "";
         
         if (cacChuyenXe.length === 0) {
@@ -357,7 +359,7 @@ document.getElementById("tab-ban-do").addEventListener("shown.bs.tab", async fun
         cacChuyenXe.forEach((chuyen, index) => {
             let mauHienTai = mauChuyenXe[index % mauChuyenXe.length]; 
             
-            // TẠO LINK GOOGLE MAPS CHỈ ĐƯỜNG CHO CHUYẾN XE NÀY
+            // Tạo link gg map chỉ đường cho chuyến xe này
             let linkGoogleMaps = "";
             if (chuyen.danhSachKhach.length === 1) {
                 let khach = chuyen.danhSachKhach[0];
@@ -368,22 +370,22 @@ document.getElementById("tab-ban-do").addEventListener("shown.bs.tab", async fun
                 linkGoogleMaps = `https://www.google.com/maps/dir/?api=1&destination=${diemCuoi.lat},${diemCuoi.lng}&waypoints=${cacDiemDung}&travelmode=driving`;
             }
 
-            // Header của chuyến xe (Có thêm nút Mở Google Maps)
+           
             htmlDanhSach += `
                 <div class="list-group-item text-white d-flex justify-content-between align-items-center shadow-sm" style="background-color: ${mauHienTai};">
                     <div style="cursor: pointer; flex-grow: 1;" onclick="window.bayDenViTri(${chuyen.latTrungTam}, ${chuyen.lngTrungTam}, 14)">
-                        <b class="fs-6">🚚 ${chuyen.tenChuyen}</b>
+                        <b class="fs-6">${chuyen.tenChuyen}</b>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <span class="badge bg-light text-dark rounded-pill shadow-sm">Tổng: ${chuyen.tongChau}/10</span>
                         <a href="${linkGoogleMaps}" target="_blank" class="btn btn-sm btn-light fw-bold text-primary shadow-sm" style="padding: 2px 8px; font-size: 0.8rem;">
-                            🗺️ Đi ngay
+                            Đi ngay
                         </a>
                     </div>
                 </div>
             `;
 
-            // Render từng khách trong chuyến (Giữ nguyên như cũ)
+            // Render từng khách trong chuyến
             chuyen.danhSachKhach.forEach(khach => {
                 const markerHtmlStyles = `
                     background-color: ${mauHienTai};
@@ -405,17 +407,17 @@ document.getElementById("tab-ban-do").addEventListener("shown.bs.tab", async fun
                     <div class="leaflet-popup-content-dist">
                         <span class="badge mb-2 text-white" style="background-color: ${mauHienTai}">${chuyen.tenChuyen}</span><br>
                         <b class="text-success">${khach.ten}</b><br>
-                        📞 SĐT: <b>${khach.sdt}</b><br>
-                        📦 Đơn: <b>${khach.sl} chậu ${khach.hoa}</b><br>
-                        🏠 Địa chỉ: ${khach.dia_chi}
+                        SĐT: <b>${khach.sdt}</b><br>
+                        Đơn: <b>${khach.sl} chậu ${khach.hoa}</b><br>
+                        Địa chỉ: ${khach.dia_chi}
                     </div>
                 `);
                 layerMarkers.addLayer(marker);
-                // TẠO LINK GOOGLE MAPS CHO TỪNG KHÁCH LẺ
+                // Tạo link gg map cho từng khách lẻ
                 let linkCaNhan = `https://www.google.com/maps/dir/?api=1&destination=${khach.lat},${khach.lng}&travelmode=driving`;
 
-                // CẬP NHẬT GIAO DIỆN CỘT BÊN TRÁI: Thêm nút 📍
-                // CẬP NHẬT GIAO DIỆN CỘT BÊN TRÁI: Thêm nút 📍 Chỉ đường và ✅ Xác nhận
+               
+               // cot giao dien nut chi duong va xac nhan da giao hang thanh cong 
                 htmlDanhSach += `
                     <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center border-start border-4" style="border-left-color: ${mauHienTai} !important;">
                         
@@ -426,8 +428,8 @@ document.getElementById("tab-ban-do").addEventListener("shown.bs.tab", async fun
                         
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge rounded-pill shadow-sm" style="background-color: ${mauHienTai}">${khach.sl} chậu</span>
-                            <a href="${linkCaNhan}" target="_blank" class="btn btn-sm btn-outline-dark shadow-sm" style="padding: 2px 6px;" title="Chỉ đường đến khách này">📍</a>
-                            <a href="javascript:void(0)" class="btn btn-sm btn-outline-success shadow-sm" style="padding: 2px 6px;" title="Xác nhận đã giao xong" onclick="window.xacNhanGiaoXong('${khach.id}')">✅</a>
+                            <a href="${linkCaNhan}" target="_blank" class="btn btn-sm btn-outline-dark shadow-sm" style="padding: 2px 6px;" title="Chỉ đường đến khách này">Chỉ đường</a>
+                            <a href="javascript:void(0)" class="btn btn-sm btn-outline-success shadow-sm" style="padding: 2px 6px;" title="Xác nhận đã giao xong" onclick="window.xacNhanGiaoXong('${khach.id}')">Xác nhận đã giao</a>
                         </div>
                         
                     </div>
@@ -445,27 +447,27 @@ document.getElementById("tab-ban-do").addEventListener("shown.bs.tab", async fun
     }
 });
 
-// HÀM BAY ĐẾN VỊ TRÍ 
+// Hàm bay đến vị trí trên bản đồ khi click vào tên chuyến hoặc khách hàng
 window.bayDenViTri = (lat, lng, mucZoom) => {
     if (map) {
         map.flyTo([lat, lng], mucZoom, { animate: true, duration: 1.5 });
     }
 };
-// HÀM XÁC NHẬN GIAO HÀNG THÀNH CÔNG TỪ BẢN ĐỒ
+// Hàm xác nhận đã giao xong cho khách hàng, cập nhật trạng thái trên Firebase và làm mới lại bản đồ
 window.xacNhanGiaoXong = async (idDocument) => {
     if(confirm("Khách đã nhận được hoa và thanh toán đầy đủ rồi đúng không em?")) {
         try {
-            // 1. Cập nhật trạng thái trên Firebase
+            // Cập nhật trạng thái đơn hàng thành "Đã giao thành công"
             await updateDoc(doc(db, "don_hang", idDocument), {
-                trang_thai: "Đã giao thành công 🎉"
+                trang_thai: "Đã giao thành công"
             });
             
-            alert("Tuyệt vời! Chốt thêm một đơn giao thành công! 💸");
+            alert("Tuyệt vời! Chốt thêm một đơn giao thành công!");
             
-            // 2. Làm mới lại danh sách trên Bản đồ (Xóa khách đã giao khỏi màn hình)
+            // 2. Làm mới lại danh sách trên Bản đồ (xóa khách đã giao khỏi màn hình)
             document.getElementById("tab-ban-do").dispatchEvent(new Event("shown.bs.tab"));
             
-            // 3. Làm mới bảng Quản lý đơn hàng tổng (nếu hàm này đang tồn tại)
+            // 3. Làm mới bảng quản lý đơn hàng tổng (nếu hàm này đang tồn tại)
             if (typeof window.taiDanhSachDonHang === 'function') {
                 window.taiDanhSachDonHang();
             }

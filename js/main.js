@@ -9,9 +9,7 @@ import { db, auth } from "./firebase.js";
 
 let currentUserEmail = "";
 
-// ==========================================
-// 1. XỬ LÝ ĐĂNG NHẬP & PHÂN QUYỀN
-// ==========================================
+// Xử lí đăng nhập vfa phân quyền
 const btnDangNhap = document.getElementById("btn-dang-nhap");
 const btnDangKy = document.getElementById("btn-dang-ky");
 const btnDangXuat = document.getElementById("btn-dang-xuat");
@@ -67,9 +65,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// ==========================================
-// 2. CHUYỂN ĐỔI GIỮA CÁC TRANG (Giao diện)
-// ==========================================
+// Chuyển dổi giữa các trang
 const khuVucSanPham = document.getElementById("khu-vuc-san-pham");
 const khuVucLichSu = document.getElementById("khu-vuc-lich-su");
 const khuVucHoSo = document.getElementById("khu-vuc-ho-so");
@@ -156,11 +152,11 @@ if(btnLayViTri) {
                 const lng = position.coords.longitude;
                 const linkMap = `https://www.google.com/maps?q=${lat},${lng}`;
                 document.getElementById("linkViTri").value = linkMap;
-                btnLayViTri.innerText = "Xong ✅";
+                btnLayViTri.innerText = "Xong";
                 btnLayViTri.classList.replace("btn-outline-primary", "btn-success");
             }, (error) => {
                 alert("Lỗi: Không lấy được vị trí. Bạn hãy bật định vị trên máy và thử lại nhé!");
-                btnLayViTri.innerText = "Thử lại 📍";
+                btnLayViTri.innerText = "Thử lại";
             });
         } else {
             alert("Trình duyệt này không hỗ trợ lấy vị trí GPS.");
@@ -168,9 +164,7 @@ if(btnLayViTri) {
     };
 }
 
-// ==========================================
-// 3. TẢI DỮ LIỆU TỪ FIRESTORE VÀ HIỂN THỊ
-// ==========================================
+// Tải dữ liệu hoa từ Firebase và hiển thị
 window.khoHoaToanCuc = [];
 
 async function taiDanhSachHoa() {
@@ -207,7 +201,7 @@ function hienThiHoa(danhSach) {
     if(!danhSachHoa) return;
 
     if (danhSach.length === 0) {
-        content = `<div class="col-12 text-center py-5"><h5 class="text-muted">Không tìm thấy chậu hoa nào phù hợp 😢</h5></div>`;
+        content = `<div class="col-12 text-center py-5"><h5 class="text-muted">Không tìm thấy chậu hoa nào phù hợp!</h5></div>`;
     } else {
         danhSach.forEach((hoa) => {
             const anhHoa = hoa.hinh_anh || "https://placehold.co/600x400?text=Chua+Co+Anh";
@@ -259,9 +253,7 @@ function locDuLieu() {
     hienThiHoa(danhSachDaLoc);
 }
 
-// ==========================================
-// 4. XỬ LÝ ĐẶT HÀNG
-// ==========================================
+// Xử lý đặt hàng
 window.moModalDatHang = (idHoa, tenHoa, giaHoa, soLuongTon) => {
     if (!auth.currentUser) {
         alert("Bạn cần Đăng nhập để có thể đặt hoa nhé!");
@@ -317,22 +309,23 @@ if(btnChotDon) {
                 so_luong: sl,
                 tong_tien: tongTien,
                 dia_chi: diachi,
-                trang_thai: "Đang xử lý ⏳",
-                ngay_dat: new Date().toLocaleString()
+                trang_thai: "Đang xử lý",
+                ngay_dat: new Date().toLocaleString(),
+                ngay_dat_timestamp: Date.now()
             });
 
             await updateDoc(doc(db, "san_pham", idHoa), {
                 so_luong_con: soLuongTon - sl
             });
-            alert("Ting ting! 🎉 Chốt đơn thành công rực rỡ! Tiệm sẽ gọi cho bạn sớm nhé!");
+            alert("Ting ting! Chốt đơn thành công rực rỡ! Tiệm sẽ gọi cho bạn sớm nhé!");
             bootstrap.Modal.getInstance(document.getElementById('modalDatHang')).hide();
 
             document.getElementById("tenKhachThat").value = "";
             document.getElementById("linkViTri").value = "";
-            document.getElementById("btnLayViTri").innerText = "📍 Lấy vị trí";
+            document.getElementById("btnLayViTri").innerText = "Lấy vị trí";
             document.getElementById("btnLayViTri").classList.replace("btn-success", "btn-outline-primary");
 
-            btnChotDon.innerText = "Chốt Đơn 🚀";
+            btnChotDon.innerText = "Chốt Đơn";
             btnChotDon.disabled = false;
             taiDanhSachHoa();
             moLichSu();
@@ -345,9 +338,7 @@ if(btnChotDon) {
     });
 }
 
-// ==========================================
-// 5. ĐÁNH GIÁ CỦA KHÁCH HÀNG
-// ==========================================
+// Đánh giá của khách hàng
 async function taiDanhGia() {
     const dsDanhGia = document.getElementById("danh-sach-danh-gia");
     if(!dsDanhGia) return;
@@ -418,7 +409,7 @@ if(btnGuiDanhGia) {
 
             alert("Cảm ơn bạn đã để lại góp ý tuyệt vời!");
             document.getElementById("noiDungDanhGia").value = "";
-            btnGuiDanhGia.innerText = "Gửi Đánh Giá 🚀";
+            btnGuiDanhGia.innerText = "Gửi Đánh Giá";
             btnGuiDanhGia.disabled = false;
             taiDanhGia();
 
@@ -429,9 +420,7 @@ if(btnGuiDanhGia) {
     });
 }
 
-// ==========================================
-// 6. QUẢN LÝ HỒ SƠ & ĐỔI MẬT KHẨU
-// ==========================================
+// Quản lí hồ sơ và đổi mật khẩu
 async function taiThongTinHoSo() {
     const user = auth.currentUser;
     if(!user) return;
@@ -469,11 +458,11 @@ if(btnLuuHoSo) {
 
             if(ten) localStorage.setItem("ten_vua_mua", ten);
             alert("Lưu thông tin thành công!");
-            btnLuuHoSo.innerText = "Lưu Thông Tin 💾";
+            btnLuuHoSo.innerText = "Lưu Thông Tin";
             capNhatTenDanhGia(); 
         } catch (error) {
             alert("Lỗi lưu hồ sơ: " + error.message);
-            btnLuuHoSo.innerText = "Lưu Thông Tin 💾";
+            btnLuuHoSo.innerText = "Lưu Thông Tin";
         }
     });
 }
@@ -511,12 +500,12 @@ if(btnDoiMatKhau) {
             document.getElementById("mkCu").value = "";
             document.getElementById("mkMoi").value = "";
             document.getElementById("mkMoi2").value = "";
-            btnDoiMatKhau.innerText = "Đổi Mật Khẩu 🔐";
+            btnDoiMatKhau.innerText = "Đổi Mật Khẩu";
 
         } catch (error) {
             if (error.code === 'auth/invalid-credential') alert("Mật khẩu cũ không đúng! Vui lòng nhớ lại xem.");
             else alert("Lỗi đổi mật khẩu: " + error.message);
-            btnDoiMatKhau.innerText = "Đổi Mật Khẩu 🔐";
+            btnDoiMatKhau.innerText = "Đổi Mật Khẩu";
         }
     });
 }
