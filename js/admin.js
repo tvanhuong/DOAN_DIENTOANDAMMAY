@@ -464,10 +464,10 @@ window.xacNhanGiaoXong = async (idDocument) => {
             
             alert("Tuyệt vời! Chốt thêm một đơn giao thành công!");
             
-            // 2. Làm mới lại danh sách trên Bản đồ (xóa khách đã giao khỏi màn hình)
+            //Làm mới lại danh sách trên Bản đồ (xóa khách đã giao khỏi màn hình)
             document.getElementById("tab-ban-do").dispatchEvent(new Event("shown.bs.tab"));
             
-            // 3. Làm mới bảng quản lý đơn hàng tổng (nếu hàm này đang tồn tại)
+            //Làm mới bảng quản lý đơn hàng tổng (nếu hàm này đang tồn tại)
             if (typeof window.taiDanhSachDonHang === 'function') {
                 window.taiDanhSachDonHang();
             }
